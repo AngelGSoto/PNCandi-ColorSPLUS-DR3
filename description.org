@@ -1,0 +1,102 @@
+* SPLUS queries
+
+Here I am putting the methodology to find the PN in S-PLUS only using one color-color diagram.
+This is to put in the Gustavo paper.
+
+It is possible to query the SPLUS data in https://splus.cloud. 
+The queries used to apply the color criteria based in =(r - F660) vs (r - i)=: 
+
+#+BEGIN_SRC sql: query
+SELECT * FROM idr3.detection_image as detection JOIN idr3.u_band as u ON detection.ID=u.ID 
+JOIN idr3.f378_band as f378 ON detection.ID=f378.ID JOIN idr3.f395_band as f395 ON detection.ID=f395.ID
+JOIN idr3.f410_band as f410 ON detection.ID=f410.ID JOIN idr3.f430_band as f430 ON detection.ID=f430.ID JOIN idr3.g_band as g ON detection.ID=g.ID 
+JOIN idr3.f515_band as f515 ON detection.ID=f515.ID JOIN idr3.r_band as r ON detection.ID=r.ID JOIN idr3.f660_band as f660 ON detection.ID=f660.ID 
+JOIN idr3.i_band as i ON detection.ID=i.ID JOIN idr3.f861_band as f861 ON detection.ID=f861.ID JOIN idr3.z_band as z ON detection.ID=z.ID 
+WHERE R_PStotal <= 21 AND F660_PStotal <= 21 AND I_PStotal <= 21 AND e_R_PStotal <= 0.2 AND e_F660_PStotal <= 0.2 AND e_I_PStotal <= 0.2 
+AND FWHM < 7.0 AND (R_PStotal - F660_PStotal) >= 0.15*(R_PStotal - I_PStotal) + 0.53
+AND (R_PStotal - F660_PStotal) <= -6.8*(R_PStotal - I_PStotal) - 1.3 
+#+END_SRC
+
+- Selected columns:
+
+#+BEGIN_SRC sql: query
+SELECT detection.Field, detection.ID, detection.RA, detection.DEC, detection.FWHM, detection.ISOarea, detection.KRON_RADIUS, 
+detection.nDet_magPStotal, detection.PhotoFlagDet, u.U_PStotal, f378.F378_PStotal, f395.F395_PStotal,
+f410.F410_PStotal, f430.F430_PStotal, g.G_PStotal, f515.F515_PStotal, r.R_PStotal, f660.F660_PStotal, i.I_PStotal, 
+f861.F861_PStotal, z.Z_PStotal, u.e_U_PStotal, f378.e_F378_PStotal, f395.e_F395_PStotal, f410.e_F410_PStotal, f430.e_F430_PStotal, 
+g.e_G_PStotal, f515.e_F515_PStotal, r.e_R_PStotal, f660.e_F660_PStotal, i.e_I_PStotal, f861.e_F861_PStotal, z.e_Z_PStotal FROM
+#+END_SRC
+
+- Join only 3 tables:
+
+#+BEGIN_SRC sql: query
+SELECT detection.ID
+FROM idr3.detection_image as detection JOIN idr3.r_band as r ON detection.ID=r.ID 
+JOIN idr3.f660_band as f660 ON detection.ID=f660.ID 
+JOIN idr3.i_band as i ON detection.ID=i.ID WHERE R_PStotal <= 21 AND F660_PStotal <= 21 
+AND I_PStotal <= 21 AND e_R_PStotal <= 0.2 AND e_F660_PStotal <= 0.2 AND e_I_PStotal <= 0.2 
+AND FWHM < 7.0 AND (R_PStotal - F660_PStotal) >= 0.15*(R_PStotal - I_PStotal) + 0.53
+AND (R_PStotal - F660_PStotal) <= -6.8*(R_PStotal - I_PStotal) - 1.3
+#+END_SRC
+
++ Cross-match with table (table found with more simple query): 
+
+- Gustavos query:
+: select * from idr3.detection_image as detection left outer join TAP_UPLOAD.upload as tap on detection.id = tap.id
+
+- My query:
+
+#+BEGIN_SRC sql: query
+SELECT * FROM TAP_UPLOAD.upload as tap JOIN idr3.detection_image as detection ON tap.ID= detection.ID JOIN idr3.u_band as u ON tap.ID=u.ID 
+JOIN idr3.f378_band as f378 ON tap.ID=f378.ID JOIN idr3.f395_band as f395 ON tap.ID=f395.ID
+JOIN idr3.f410_band as f410 ON tap.ID=f410.ID JOIN idr3.f430_band as f430 ON tap.ID=f430.ID JOIN idr3.g_band as g ON tap.ID=g.ID 
+JOIN idr3.f515_band as f515 ON tap.ID=f515.ID JOIN idr3.r_band as r ON tap.ID=r.ID JOIN idr3.f660_band as f660 ON tap.ID=f660.ID 
+JOIN idr3.i_band as i ON tap.ID=i.ID JOIN idr3.f861_band as f861 ON tap.ID=f861.ID JOIN idr3.z_band as z ON tap.ID=z.ID 
+#+END_SRC
+
+- My query with select columns:
+
+#+BEGIN_SRC sql: query
+SELECT detection.Field, detection.ID, detection.RA, detection.DEC, detection.FWHM, detection.ISOarea, detection.KRON_RADIUS, 
+detection.nDet_magPStotal, detection.PhotoFlagDet, u.U_PStotal, f378.F378_PStotal, f395.F395_PStotal,
+f410.F410_PStotal, f430.F430_PStotal, g.G_PStotal, f515.F515_PStotal, r.R_PStotal, f660.F660_PStotal, i.I_PStotal, 
+f861.F861_PStotal, z.Z_PStotal, u.e_U_PStotal, f378.e_F378_PStotal, f395.e_F395_PStotal, f410.e_F410_PStotal, f430.e_F430_PStotal, 
+g.e_G_PStotal, f515.e_F515_PStotal, r.e_R_PStotal, f660.e_F660_PStotal, i.e_I_PStotal, f861.e_F861_PStotal, z.e_Z_PStotal 
+FROM TAP_UPLOAD.upload as tap JOIN idr3.detection_image as detection ON tap.ID= detection.ID  JOIN idr3.u_band as u ON tap.ID=u.ID 
+JOIN idr3.f378_band as f378 ON tap.ID=f378.ID JOIN idr3.f395_band as f395 ON tap.ID=f395.ID
+JOIN idr3.f410_band as f410 ON tap.ID=f410.ID JOIN idr3.f430_band as f430 ON tap.ID=f430.ID JOIN idr3.g_band as g ON tap.ID=g.ID 
+JOIN idr3.f515_band as f515 ON tap.ID=f515.ID JOIN idr3.r_band as r ON tap.ID=r.ID JOIN idr3.f660_band as f660 ON tap.ID=f660.ID 
+JOIN idr3.i_band as i ON tap.ID=i.ID JOIN idr3.f861_band as f861 ON tap.ID=f861.ID JOIN idr3.z_band as z ON tap.ID=z.ID 
+#+END_SRC
+
+** Executing time
+- Using this query take 11.45min on which I got a list 415 objects. The file resulting =PNcand_R-Halphavsr-i.csv=.
+
+- Selecting only ID in table take 11.27min
+
+- Selecting only ID, RA and DEC in table take 11.9min
+
+- Making cross-matching take a few seconds. 
+
++ Without using JOIN and ON in the argument:
+
+#+BEGIN_SRC sql: query
+SELECT TOP 100 * FROM idr3.u_band as u, idr3.f378_band as f378, idr3.f395_band as f395, idr3.f410_band as f410, 
+ idr3.f430_band as f430, idr3.g_band as g, idr3.f515_band as f515, 
+idr3.r_band as r, idr3.f660_band as f660, idr3.i_band as i, idr3.f861_band as f861, idr3.z_band as z WHERE
+u.ID = f378.ID = f395.ID = f410.ID = f430.ID = g.ID = f515.ID = r.ID = f660.ID = i.ID = f861.ID = z.ID 
+AND r_PStotal - F660_PStotal > 0.5
+#+END_SRC
+
+** A simple query
+
+: SELECT TOP 100 * FROM idr3.r_band as r, idr3.f660_band as f660 WHERE r.ID=f660.id AND r_PStotal - F660_PStotal > 0.5
+
+- Using JOIN and ON in the argument:
+
+: SELECT TOP 100 * FROM idr3.r_band as r JOIN idr3.f660_band as f660 ON r.ID=f660.id WHERE r_PStotal - F660_PStotal > 0.5
+
+From the tutorial of Gustavo:
+
+: SELECT id, ra, dec FROM idr3.f660_band
+
