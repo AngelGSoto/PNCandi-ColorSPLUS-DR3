@@ -1,4 +1,4 @@
-* SPLUS queries
+* PN candidates SPLUS queries
 
 Here I am putting the methodology to find the PN in S-PLUS only using one color-color diagram.
 This is to put in the Gustavo paper.
