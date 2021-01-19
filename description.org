@@ -78,7 +78,7 @@ JOIN idr3.i_band as i ON tap.ID=i.ID JOIN idr3.f861_band as f861 ON tap.ID=f861.
 
 - Making cross-matching take a few seconds. 
 
-+ Without using JOIN and ON in the argument:
+++ Without using JOIN and ON in the argument:
 
 #+BEGIN_SRC sql: query
 SELECT TOP 100 * FROM idr3.u_band as u, idr3.f378_band as f378, idr3.f395_band as f395, idr3.f410_band as f410, 
